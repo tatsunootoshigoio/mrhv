@@ -1,5 +1,5 @@
 #-----------------------------------------------------#
-# MR & Hall voltage vs. 2theta ploter v0.1		  ----#
+# MR & Hall voltage vs. 2theta plot v0.1          ----#
 # author: tatsunootoshigo, 7475un00705hi90@gmail.com  #
 #-----------------------------------------------------#
 
