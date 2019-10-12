@@ -1,5 +1,5 @@
 #-----------------------------------------------------#
-# MR & Hall voltage vs. 2theta plot v0.1          ----#
+# MR & Hall voltage vs. 2theta plot v0.1          	  #
 # author: tatsunootoshigo, 7475un00705hi90@gmail.com  #
 #-----------------------------------------------------#
 
@@ -216,6 +216,8 @@ def custom_axis_formater(custom_x_label, custom_y_label, xmin, xmax, ymin, ymax,
 
 	return;
 
+''' Generates values for the report description part '''
+
 def tuteta_gen_desc(sample_field, sample_current, cal_resist_in):
 	
 	row_delimiter = '\n'
@@ -250,13 +252,15 @@ def tuteta_gen_desc(sample_field, sample_current, cal_resist_in):
 
 	plt.figtext(desc_x, desc_y, 'R peak values' + hr_line +  r'$R_{xy}\;/\;\Omega$' + separator + separator + separator + r'$R_{zx}\;/\;\Omega$' + separator + separator + separator + r'$R_{zy}\;/\;\Omega$' + row_delimiter + Rxy1 + separator + Rzx1 + separator + Rzy1 + row_delimiter + Rxy2 + separator + Rzx2 + separator + Rzy2 + row_delimiter + Rxy3 + separator + Rzx3 + separator + Rzy3 + row_delimiter + Rxy4 + separator + Rzx4 + separator + Rzy4 + row_delimiter + Rxy5 + separator + Rzx5 + separator + Rzy5 + hr_line + r'$MR_{ratio}^{(xy)}$' + separator + separator + r'$MR_{ratio}^{(zx)}$' + separator + separator + r'$MR_{ratio}^{(zy)}$' + row_delimiter + MRxy + '%' + separator + MRzx + '%' + separator + MRzy + '%' + hr_line + r'$\rho_{xx}=$' + rhoxx + r'$\,\mu\Omega cm $' + row_delimiter + r'$\rho_{xy}=$' + rhoxy + r'$\,\mu\Omega cm $' + row_delimiter + r'$\theta_{AH}=$' + theta_ahe + separator + r'$\theta_{AH}^2=$' + theta_ahe2 + hr_line + r'$I=$'+ np.str(sample_current) + r'$\, mA$' + ', ' + r'$H=$' + np.str(sample_field) + r'$\,T$' + row_delimiter + r'$w=$' + np.str(sample_w) + r'$\;mm$'+ ', ' + r'$d=$' + np.str(sample_d) + r'$\;nm$' + ', ' + r'$L_V= $' + np.str(sample_l) + r'$\;mm$' + ', '+ r'$L_H$=' + np.str(sample_vh_l) + r'$\;mm$', size=14)
 	
-	# verison name text
+	# version name label text 
 	plt.figtext(0.84, 0.99, version_name, size=8)
 
 	return;
 
+''' Loads data files for processing of the MR'''
 def tuteta_open_in_mr(sample_mdate, sample_id, sample_no):
 
+	# data file names to be loaded for each of the measurement geometries
 	file_xy = sample_mdate + sample_id + '-xy' 
 	file_xz = sample_mdate + sample_id + '-xz'
 	file_yz = sample_mdate + sample_id + '-yz'
@@ -268,8 +272,10 @@ def tuteta_open_in_mr(sample_mdate, sample_id, sample_no):
 
 	return np.array([x1,y1,x2,y2,x3,y3]);
 
+''' Loads data files for processing of the Hall voltage'''
 def tuteta_open_in_hv(sample_mdate, sample_id, sample_no):
 
+	# data file names to be loaded for each of the measurement geometries
 	file_xy = sample_mdate + sample_id + '-xy_vh' 
 	file_xz = sample_mdate + sample_id + '-xz_vh'
 	file_yz = sample_mdate + sample_id + '-yz_vh'
@@ -281,6 +287,7 @@ def tuteta_open_in_hv(sample_mdate, sample_id, sample_no):
 
 	return np.array([x1,y1,x2,y2,x3,y3]);
 
+''' Shift the data vertically for plotting '''
 def tuteta_shift(raw_tuteta_data, shift_xy, shift_xz, shift_yz):
 
 	x1 = raw_tuteta_data[0] * (xmax / np.amax(raw_tuteta_data[0]))
@@ -293,6 +300,7 @@ def tuteta_shift(raw_tuteta_data, shift_xy, shift_xz, shift_yz):
 
 	return np.array([x1,y1,x2,y2,x3,y3]);
 
+''' Enables fitting off the angular dependence of the MR'''
 def tuteta_fit_mr(R0, A1, A2, d1, d2):
 
 	x = np.arange(0, 2*np.pi, 0.1)
@@ -302,10 +310,12 @@ def tuteta_fit_mr(R0, A1, A2, d1, d2):
 
 	return;
 
+''' Calculates peak MR values for each of the MR peak values in designated areas of the angular dependence '''
 def tuteta_resit_cal(tuteta_data):
 
 	# look for the peak value in this area surrounding 0,90,180,270,360 deg point
 	deg_spread = 15
+	
 	# index of the x values in the input data
 	indx = 0
 
@@ -402,9 +412,12 @@ def tuteta_resit_cal(tuteta_data):
 	print('AMR ratio xz : ' + np.str('% 1.3f' % AMR_ratio_xz) + '%')
 	print('SMR ratio yz : ' + np.str('% 1.3f' % SMR_ratio_yz) + '%')
 
+	# collect calculated values of MR in an numpy array 
 	return np.array([(R_xy_000deg / sample_current, R_xy_090deg / sample_current, R_xy_180deg / sample_current, R_xy_270deg / sample_current, R_xy_360deg / sample_current, AMR_ratio_xy),(R_xz_000deg / sample_current, R_xz_090deg / sample_current, R_xz_180deg / sample_current, R_xz_270deg / sample_current, R_xz_360deg / sample_current, AMR_ratio_xz),(R_yz_000deg / sample_current, R_yz_090deg / sample_current, R_yz_180deg / sample_current, R_yz_270deg / sample_current, R_yz_360deg / sample_current, SMR_ratio_yz)]);
 
+''' Plot the angular dependence of MR for each of the measurement geometries '''
 def tuteta_plot(tuteta_data, sample_current, ymin, ymax, label_xy, label_xz, label_yz, polarity_xy, polarity_xz, polarity_yz):
+	
 	# plot recalculated data with background removed
 	# 'ro-' -> red circles with solid line
 	tx1, = plt.plot(tuteta_data[0], polarity_xy * tuteta_data[1] / sample_current, 'co', mfc='lightcyan', markersize=6, label=label_xy)
@@ -420,7 +433,7 @@ def tuteta_plot(tuteta_data, sample_current, ymin, ymax, label_xy, label_xz, lab
 
 	return;
 
-# Create a new figure of size 8x8 inches, using 100 dots per inch
+# Create plot figure figure of size 8x8 inches, using 100 dots per inch
 # protip: A4 is 8.3 x 11.7 inches
 fig = plt.figure(figsize=(10, 14), dpi=72)
 spec = gridspec.GridSpec(ncols=3, nrows=3)
@@ -428,24 +441,26 @@ fig.canvas.set_window_title('mrhv_plots_' + sample_mdate + sample_id)
 
 # set the sample no for which to calculate and plot data
 sample_no = 0
-# set title of the plot 
-#plt_title = gen_plot_title(sample_no)
-# load raw data from measuremnt files for sample_no: 3 
+
+# load raw data from measurement files for sample_no: 3 
 tuteta_mr_files_in = tuteta_open_in_mr(sample_mdate, sample_id, sample_no)
 tuteta_hv_files_in = tuteta_open_in_hv(sample_mdate, sample_id, sample_no)
+
 # shift the data vertically 
 tuteta_shifted_mr = tuteta_shift(tuteta_mr_files_in, mr_shift_xy, mr_shift_xz, mr_shift_yz)
 tuteta_shifted_hv = tuteta_shift(tuteta_hv_files_in, hv_shift_xy, hv_shift_xz, hv_shift_yz)
 
-# calcluate MR ratios for the MR curves
+# calculate MR ratios for the MR curves
 calculated_resist = tuteta_resit_cal(tuteta_shifted_mr)
 
 # add subplot of first sample data (mr curves)
 xy1 = fig.add_subplot(6,6,(1,24))
+
 # plot the data for xy, xz, yz mr curves
 tuteta_plot(tuteta_shifted_mr, sample_current, mr_ymin, mr_ymax, mr_label_xy, mr_label_xz, mr_label_yz, 1.0, 1.0, 1.0)
 custom_axis_formater(axis_label_theta, axis_label_ohm, xmin, xmax, mr_ymin, mr_ymax, xprec, yprec)
 set_plot_title(1)
+
 # plot the data for xy, xz, yz hv curves
 xy2 = fig.add_subplot(6,6,(28,36))
 tuteta_plot(tuteta_shifted_hv, sample_current, hv_ymin, hv_ymax, hv_label_xy, hv_label_xz, hv_label_yz, 1.0, 1.0, 1.0)
@@ -461,7 +476,6 @@ tuteta_gen_desc(sample_field, sample_current, calculated_resist)
 #tuteta_fit_mr(R0, A1, A2, d1, d2)
 # format axis and add labels
 
-
 fig.tight_layout(pad=5.0, w_pad=0.0, h_pad=0.0)
 #plt.subplots_adjust(left=0.15, bottom=0.3, wspace=0.4, hspace=0.2)
 
@@ -473,5 +487,5 @@ pp.close()
 # save as .svg too
 fig = plt.savefig(out_svg)
 
-# show plot preview
+# show plot widget
 plt.show()
